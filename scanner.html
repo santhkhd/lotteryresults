@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ticket Scanner</title>
+    <link href="output.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-24 selection:bg-blue-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-40 glass border-b border-gray-100 transition-all duration-300">
+        <div class="px-5 h-16 flex items-center justify-between max-w-2xl mx-auto">
+            <div class="flex items-center gap-3">
+                <button onclick="goBack()"
+                    class="p-2 -ml-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all text-gray-600">
+                    <span class="material-icons-round text-2xl">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800" id="header-title">Scanner</h1>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="langIconBtn"
+                    class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">
+                    <span class="material-icons-round text-xl">translate</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Language Popup -->
+    <div id="langPopup"
+        class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800">Choose Language</h3>
+                <button class="p-2 bg-gray-100 rounded-full active:bg-gray-200 transition-colors"
+                    onclick="document.getElementById('langPopup').classList.add('hidden')">
+                    <span class="material-icons-round text-gray-500">close</span>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <button
+                    class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+                    data-lang="en">
+                    <span>English</span>
+                    <span class="text-xl">🇺🇸</span>
+                </button>
+                <button
+                    class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+                    data-lang="ml">
+                    <span>മലയാളം</span>
+                    <span class="text-xl">🇮🇳</span>
+                </button>
+                <button
+                    class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+                    data-lang="ta">
+                    <span>தமிழ்</span>
+                    <span class="text-xl">🇮🇳</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="pt-24 px-5 max-w-2xl mx-auto min-h-screen space-y-8">
+
+        <div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 relative">
+            <!-- Fake Camera Viewfinder -->
+            <div class="bg-gray-900 h-64 relative flex items-center justify-center overflow-hidden">
+                <div
+                    class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+                </div>
+                <div class="w-64 h-32 border-2 border-white/50 rounded-lg relative">
+                    <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blue-500"></div>
+                    <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blue-500"></div>
+                    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blue-500"></div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blue-500"></div>
+                    <div class="absolute top-1/2 left-0 w-full h-0.5 bg-red-500/50"></div>
+                </div>
+                <div class="absolute bottom-4 text-white/50 text-xs font-mono">CAMERA FEED UNAVAILABLE</div>
+            </div>
+
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800" id="inputTitle">Manual Entry</h2>
+                    <p class="text-gray-500 text-sm">Enter ticket details below to check</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+                            id="numberLabel">Ticket Number</label>
+                        <input type="text" id="ticketNumber" placeholder="e.g. AB 123456"
+                            class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-lg font-mono rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all uppercase">
+                        <p class="text-[10px] text-gray-400 mt-1 pl-1">Include series code if available</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+                            id="dateLabel">Draw Date</label>
+                        <input type="date" id="drawDate"
+                            class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-lg rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
+
+                    <button onclick="processManualInput()"
+                        class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <span class="material-icons-round">qr_code_scanner</span>
+                        <span id="scanButton">Check Ticket</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="scannerResults" class="w-full"></div>
+
+    </main>
+
+    <nav
+        class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-200 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+        <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
+            <a href="index.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">home</span>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+            <a href="prediction.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">auto_awesome</span>
+                <span class="text-[10px] font-medium">Lucky</span>
+            </a>
+            <a href="search.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">search</span>
+                <span class="text-[10px] font-medium">Search</span>
+            </a>
+            <a href="scanner.html"
+                class="flex flex-col items-center justify-center w-full h-full text-blue-600 relative">
+                <div class="absolute -top-1 w-8 h-1 bg-blue-600 rounded-b-full"></div>
+                <span class="material-icons-round text-2xl mb-0.5 animate-bounce-short">qr_code_scanner</span>
+                <span class="text-[10px] font-bold">Scan</span>
+            </a>
+            <a href="live.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5 text-rose-500">live_tv</span>
+                <span class="text-[10px] font-medium text-rose-500">Live</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        // Logic from previous scanner.html logic
+
+        // UI Strings
+        const langStrings = {
+            en: {
+                pageTitle: "Scanner",
+                inputTitle: "Manual Entry",
+                numberLabel: "Ticket Number",
+                dateLabel: "Draw Date",
+                scanButton: "Check Ticket",
+                winner: (count) => `🎉 YOU ARE A WINNER! Found ${count} prize(s)`,
+                noWin: "No Winning Numbers Found",
+                betterLuck: "Better luck next time!",
+                viewFullResult: "View Full Result"
+            },
+            ml: {
+                pageTitle: "സ്കാനർ",
+                inputTitle: "ടിക്കറ്റ് പരിശോധന",
+                numberLabel: "ടിക്കറ്റ് നമ്പർ",
+                dateLabel: "തീയതി",
+                scanButton: "പരിശോധിക്കുക",
+                winner: (count) => `🎉 അഭിനന്ദനങ്ങൾ! ${count} സമ്മാനങ്ങൾ`,
+                noWin: "വിജയിച്ച നമ്പറുകൾ ഇല്ല",
+                betterLuck: "അടുത്ത തവണ ശ്രമിക്കുക",
+                viewFullResult: "ഫലം കാണുക"
+            },
+            ta: {
+                pageTitle: "ஸ்கேனர்",
+                inputTitle: "டிக்கெட் சரிபார்ப்பு",
+                numberLabel: "டிக்கெட் எண்",
+                dateLabel: "தேதி",
+                scanButton: "சரிபார்",
+                winner: (count) => `🎉 வாழ்த்துக்கள்! ${count} வெற்றிகள்`,
+                noWin: "வெற்றி எண்கள் இல்லை",
+                betterLuck: "அடுத்த முறை முயற்சிக்கவும்",
+                viewFullResult: "முழு முடிவு"
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'en';
+        let historyData = [];
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            const t = langStrings[lang];
+
+            document.getElementById('header-title').textContent = t.pageTitle;
+            document.getElementById('inputTitle').textContent = t.inputTitle;
+            document.getElementById('numberLabel').textContent = t.numberLabel;
+            document.getElementById('dateLabel').textContent = t.dateLabel;
+            document.getElementById('scanButton').textContent = t.scanButton;
+
+            // Update popups buttons style
+            document.querySelectorAll('.lang-popup-btn').forEach(btn => {
+                if (btn.dataset.lang === lang) btn.classList.add('bg-blue-50', 'border-blue-500');
+                else btn.classList.remove('bg-blue-50', 'border-blue-500');
+            });
+        }
+
+        // Popup Logic
+        const langIconBtn = document.getElementById('langIconBtn');
+        const langPopup = document.getElementById('langPopup');
+
+        langIconBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langPopup.classList.remove('hidden');
+        });
+
+        document.body.addEventListener('click', (e) => {
+            if (!langPopup.contains(e.target) && !langIconBtn.contains(e.target)) {
+                langPopup.classList.add('hidden');
+            }
+        });
+
+        document.querySelectorAll('.lang-popup-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLang(btn.dataset.lang);
+                langPopup.classList.add('hidden');
+            });
+        });
+
+        function goBack() {
+            window.history.length > 1 ? window.history.back() : window.location.href = 'index.html';
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('history.json');
+                historyData = await res.json();
+                // Default date to today or latest record
+                if (historyData.length > 0) {
+                    const latest = historyData.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                    // Ensure format yyyy-mm-dd
+                    // history.json date might be "2025-01-01" or "01-01-2025". Standard inputs need YYYY-MM-DD
+                    // Assuming history has YYYY-MM-DD or standard format compatible with new Date()
+                }
+                document.getElementById('drawDate').valueAsDate = new Date();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function processManualInput() {
+            const number = document.getElementById('ticketNumber').value.trim();
+            const date = document.getElementById('drawDate').value;
+            const resultsContainer = document.getElementById('scannerResults');
+            const t = langStrings[currentLang];
+
+            if (!number || !date) return;
+
+            // Search logic
+            const result = historyData.find(r => r.date === date);
+
+            let winningPrizes = [];
+
+            if (result) {
+                const searchLower = number.replace(/\s+/g, '').toLowerCase();
+                (result.prizes || []).forEach(p => {
+                    (p.winners || []).forEach(w => {
+                        const wClean = w.replace(/\s+/g, '').toLowerCase();
+                        // Match logic
+                        let isMatch = false;
+                        if (wClean === searchLower) isMatch = true;
+                        // Ends with match (last 4 digits often)
+                        else if (searchLower.length >= 4 && wClean.endsWith(searchLower)) isMatch = true;
+                        // Or if user entered full ticket PM123456 and winner is 123456 (less likely but possible)
+
+                        if (isMatch) winningPrizes.push({ prize: p.label, amount: p.amount, match: w });
+                    });
+                });
+            }
+
+            if (winningPrizes.length > 0) {
+                resultsContainer.innerHTML = `
+               <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white text-center shadow-lg mt-6">
+                    <div class="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                         <span class="text-4xl">🎉</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">${t.winner(winningPrizes.length)}</h3>
+                    
+                    <div class="space-y-3 mt-6">
+                        ${winningPrizes.map(p => `
+                            <div class="bg-white/10 rounded-xl p-3 border border-white/20 backdrop-blur-sm">
+                                <div class="font-bold text-yellow-300 text-lg">${p.prize}</div>
+                                <div class="text-sm font-mono opacity-80 mt-1">Ticket: ${p.match}</div>
+                                <div class="text-xl font-bold mt-1">₹${p.amount ? parseInt(p.amount).toLocaleString() : ''}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <a href="result.html?file=${result ? result.filename : ''}" class="mt-6 inline-block bg-white text-green-600 font-bold py-3 px-8 rounded-xl shadow-lg active:scale-95 transition-all">
+                        ${t.viewFullResult}
+                    </a>
+               </div>
+            `;
+            } else {
+                resultsContainer.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 mt-6">
+                    <div class="bg-red-50 text-red-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                         <span class="material-icons-round text-3xl">sentiment_dissatisfied</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-1">${t.noWin}</h3>
+                    <p class="text-gray-500 text-sm mb-6">${t.betterLuck}</p>
+                    
+                    ${result ? `<a href="result.html?file=${result.filename}" class="inline-block bg-gray-100 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-200 transition-colors text-sm">${t.viewFullResult}</a>` : ''}
+                </div>
+            `;
+            }
+        }
+
+        // Init
+        setLang(currentLang);
+        loadHistory();
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Lucky Prediction</title>
+  <link href="output.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+
+      60% {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.05);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .number-badge {
+      animation: fadeUp 0.5s cubic-bezier(.23, 1.5, .32, 1) forwards;
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-24 selection:bg-blue-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="fixed top-0 w-full z-40 glass border-b border-gray-100 transition-all duration-300">
+    <div class="px-5 h-16 flex items-center justify-between max-w-2xl mx-auto">
+      <div class="flex items-center gap-3">
+        <button onclick="goBack()"
+          class="p-2 -ml-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all text-gray-600">
+          <span class="material-icons-round text-2xl">arrow_back</span>
+        </button>
+        <h1 class="text-xl font-bold text-gray-800" id="header-title">Prediction</h1>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="langIconBtn"
+          class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">
+          <span class="material-icons-round text-xl">translate</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Language Popup -->
+  <div id="langPopup"
+    class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity">
+    <div class="bg-white w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-bold text-gray-800">Choose Language</h3>
+        <button class="p-2 bg-gray-100 rounded-full active:bg-gray-200 transition-colors"
+          onclick="document.getElementById('langPopup').classList.add('hidden')">
+          <span class="material-icons-round text-gray-500">close</span>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <button
+          class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+          data-lang="en">
+          <span>English</span>
+          <span class="text-xl">🇺🇸</span>
+        </button>
+        <button
+          class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+          data-lang="ml">
+          <span>മലയാളം</span>
+          <span class="text-xl">🇮🇳</span>
+        </button>
+        <button
+          class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+          data-lang="ta">
+          <span>தமிழ்</span>
+          <span class="text-xl">🇮🇳</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="pt-24 px-5 max-w-2xl mx-auto min-h-screen space-y-8">
+
+    <div class="text-center">
+      <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 mb-2"
+        id="luckyTitle">Generate Lucky Numbers</h2>
+      <p class="text-gray-500 text-sm">Tap a category below to generate</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="grid grid-cols-2 gap-3">
+      <button id="hotBtn" disabled
+        class="bg-gradient-to-br from-orange-400 to-orange-600 text-white p-4 rounded-2xl shadow-lg shadow-orange-200 active:scale-95 transition-all text-left group">
+        <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform origin-left">🔥</span>
+        <span class="font-bold block lang-hot">Hot Numbers</span>
+        <span class="text-xs opacity-80">Frequently drawn</span>
+      </button>
+      <button id="coldBtn" disabled
+        class="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-4 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-all text-left group">
+        <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform origin-left">❄️</span>
+        <span class="font-bold block lang-cold">Cold Numbers</span>
+        <span class="text-xs opacity-80">Rarely drawn</span>
+      </button>
+      <button id="randomBtn" disabled
+        class="bg-gradient-to-br from-purple-400 to-purple-600 text-white p-4 rounded-2xl shadow-lg shadow-purple-200 active:scale-95 transition-all text-left group">
+        <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform origin-left">🎲</span>
+        <span class="font-bold block lang-random">Random</span>
+        <span class="text-xs opacity-80">Pure luck</span>
+      </button>
+      <button id="repeatBtn" disabled
+        class="bg-gradient-to-br from-emerald-400 to-emerald-600 text-white p-4 rounded-2xl shadow-lg shadow-emerald-200 active:scale-95 transition-all text-left group">
+        <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform origin-left">🔁</span>
+        <span class="font-bold block lang-repeat">Repeated</span>
+        <span class="text-xs opacity-80">Consecutive wins</span>
+      </button>
+    </div>
+
+    <!-- Results Area -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[300px]">
+      <div id="loadingMsg" class="flex flex-col items-center justify-center h-48 space-y-4">
+        <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-gray-400 font-medium">Analyzing patterns...</span>
+      </div>
+
+      <div id="spinner" style="display:none;" class="flex justify-center p-8">
+        <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <div id="bigNumber"
+        class="hidden text-center py-8 mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl text-white shadow-lg cursor-pointer active:scale-95 transition-transform select-none">
+        <!-- Big number content injected here -->
+      </div>
+
+      <h3 id="numberLabel" class="text-center font-bold text-gray-800 mb-4 text-lg hidden"></h3>
+      <div id="numberGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-3"></div>
+
+      <h3 id="numberLabel6" class="text-center font-bold text-gray-800 mt-8 mb-4 text-lg hidden"></h3>
+      <div id="numberGrid6" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
+    </div>
+
+    <!-- Recent Draws Collapsible -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="recentCard">
+      <button id="toggleRecentBtn"
+        class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <span class="font-bold text-gray-700 flex items-center gap-2">
+          <span class="material-icons-round text-gray-400">history</span>
+          <span class="lang-recent">Recent Draws</span>
+        </span>
+        <span class="material-icons-round text-gray-400 transition-transform" id="recentArrow">expand_more</span>
+      </button>
+      <div id="recentDraws" class="hidden p-4 space-y-3 bg-gray-50/50"></div>
+    </div>
+
+  </main>
+
+  <nav
+    class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-200 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+    <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
+      <a href="index.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5">home</span>
+        <span class="text-[10px] font-medium">Home</span>
+      </a>
+      <a href="prediction.html" class="flex flex-col items-center justify-center w-full h-full text-blue-600 relative">
+        <div class="absolute -top-1 w-8 h-1 bg-blue-600 rounded-b-full"></div>
+        <span class="material-icons-round text-2xl mb-0.5 animate-bounce-short">auto_awesome</span>
+        <span class="text-[10px] font-bold">Lucky</span>
+      </a>
+      <a href="search.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5">search</span>
+        <span class="text-[10px] font-medium">Search</span>
+      </a>
+      <a href="scanner.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5">qr_code_scanner</span>
+        <span class="text-[10px] font-medium">Scan</span>
+      </a>
+      <a href="live.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5 text-rose-500">live_tv</span>
+        <span class="text-[10px] font-medium text-rose-500">Live</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // --- Logic Transferred & Adapted ---
+
+    // UI Elements
+    const hotBtn = document.getElementById('hotBtn');
+    const coldBtn = document.getElementById('coldBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const loadingMsg = document.getElementById('loadingMsg');
+    const spinner = document.getElementById('spinner');
+    const bigNumber = document.getElementById('bigNumber');
+    const numberGrid = document.getElementById('numberGrid');
+    const numberLabel = document.getElementById('numberLabel');
+    const numberGrid6 = document.getElementById('numberGrid6');
+    const numberLabel6 = document.getElementById('numberLabel6');
+    const recentDraws = document.getElementById('recentDraws');
+    const toggleRecentBtn = document.getElementById('toggleRecentBtn');
+
+    // Language Support
+    const langStrings = {
+      en: {
+        header: 'Lucky Prediction',
+        title: 'Generate Lucky Numbers',
+        hot: 'Hot Numbers', cold: 'Cold Numbers', random: 'Random', repeat: 'Repeated',
+        recent: 'Recent Draws', show: 'Show', hide: 'Hide',
+        msgTap: 'Tap to copy', msgCopied: 'Copied!'
+      },
+      ml: {
+        header: 'ഭാഗ്യ പ്രവചനം',
+        title: 'ഭാഗ്യസംഖ്യകൾ',
+        hot: 'കൂടുതൽ വന്നവ', cold: 'കുറവ് വന്നവ', random: 'റാൻഡം', repeat: 'ആവർത്തിച്ചവ',
+        recent: 'സമീപകാല നറുക്കെടുപ്പുകൾ', show: 'കാണിക്കുക', hide: 'മറയ്ക്കുക',
+        msgTap: 'പകർത്താൻ അമർത്തുക', msgCopied: 'പകർത്തി!'
+      },
+      ta: {
+        header: 'அதிர்ஷ்ட கணிப்பு',
+        title: 'அதிர்ஷ்ட எண்கள்',
+        hot: 'அதிகம் வந்தவை', cold: 'குறைவாக வந்தவை', random: 'சீரற்ற', repeat: 'மீண்டும்',
+        recent: 'சமீபத்திய டிரா', show: 'காட்டு', hide: 'மறை',
+        msgTap: 'நகலெடுக்க தட்டவும்', msgCopied: 'நகலெடுக்கப்பட்டது!'
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'en';
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('lang', lang);
+      const t = langStrings[lang];
+
+      document.getElementById('header-title').textContent = t.header;
+      document.getElementById('luckyTitle').textContent = t.title;
+
+      // Update labels
+      document.querySelector('.lang-hot').textContent = t.hot;
+      document.querySelector('.lang-cold').textContent = t.cold;
+      document.querySelector('.lang-random').textContent = t.random;
+      document.querySelector('.lang-repeat').textContent = t.repeat;
+      document.querySelector('.lang-recent').textContent = t.recent;
+
+      // Update popups buttons style
+      document.querySelectorAll('.lang-popup-btn').forEach(btn => {
+        if (btn.dataset.lang === lang) btn.classList.add('bg-blue-50', 'border-blue-500');
+        else btn.classList.remove('bg-blue-50', 'border-blue-500');
+      });
+    }
+
+    // Popup Logic
+    const langIconBtn = document.getElementById('langIconBtn');
+    const langPopup = document.getElementById('langPopup');
+
+    langIconBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langPopup.classList.remove('hidden');
+    });
+
+    document.body.addEventListener('click', (e) => {
+      if (!langPopup.contains(e.target) && !langIconBtn.contains(e.target)) {
+        langPopup.classList.add('hidden');
+      }
+    });
+
+    document.querySelectorAll('.lang-popup-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setLang(btn.dataset.lang);
+        langPopup.classList.add('hidden');
+      });
+    });
+
+    function goBack() {
+      window.history.length > 1 ? window.history.back() : window.location.href = 'index.html';
+    }
+
+    // Prediction Logic
+    let historyData = [];
+    let freq4 = {}, freq6 = {}, all4 = [], all6 = [], lastDraws = [];
+
+    async function loadData() {
+      try {
+        const res = await fetch('history.json');
+        if (!res.ok) throw new Error('Failed');
+        historyData = await res.json();
+
+        analyzeHistory();
+        renderRecentDraws();
+
+        // Enable UI
+        loadingMsg.classList.add('hidden');
+        [hotBtn, coldBtn, randomBtn, repeatBtn].forEach(b => b.disabled = false);
+
+      } catch (e) {
+        loadingMsg.innerHTML = '<span class="text-red-500">Failed to load data.</span>';
+      }
+    }
+
+    function analyzeHistory() {
+      freq4 = {}; freq6 = {}; all4 = []; all6 = []; lastDraws = [];
+      historyData.forEach(draw => {
+        (draw.numbers4 || []).forEach(n => {
+          freq4[n] = (freq4[n] || 0) + 1; all4.push(n);
+        });
+        (draw.numbers6 || []).forEach(n => {
+          freq6[n] = (freq6[n] || 0) + 1; all6.push(n);
+        });
+        lastDraws.push({ date: draw.date, numbers4: draw.numbers4, numbers6: draw.numbers6 });
+      });
+    }
+
+    // Helper functions
+    function getHotNumbers(freq, count = 24) { return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, count).map(x => x[0]); }
+    function getColdNumbers(freq, count = 24) { return Object.entries(freq).sort((a, b) => a[1] - b[1]).slice(0, count).map(x => x[0]); }
+    function getRandomNumbers(arr, count = 24) { return arr.slice().sort(() => Math.random() - 0.5).slice(0, count); }
+    function getRepeatedNumbersWithCount(freq, minCount = 2, max = 24) {
+      return Object.entries(freq).filter(x => x[1] >= minCount).sort((a, b) => b[1] - a[1]).slice(0, max);
+    }
+
+    function showNumbers(type) {
+      // Reset UI
+      bigNumber.classList.add('hidden');
+      numberGrid.innerHTML = ''; numberGrid6.innerHTML = '';
+      numberLabel.classList.add('hidden'); numberLabel6.classList.add('hidden');
+      loadingMsg.classList.add('hidden');
+      spinner.style.display = 'flex';
+
+      // Wait a bit for UX
+      setTimeout(() => {
+        spinner.style.display = 'none';
+
+        let nums = [], nums6 = [], title = '';
+        let isRepeated = (type === 'repeat');
+
+        if (type === 'hot') {
+          nums = getHotNumbers(freq4, 24); nums6 = getHotNumbers(freq6, 12); title = '🔥 Hot Numbers';
+        } else if (type === 'cold') {
+          nums = getColdNumbers(freq4, 24); nums6 = getColdNumbers(freq6, 12); title = '❄️ Cold Numbers';
+        } else if (type === 'random') {
+          nums = getRandomNumbers(all4, 24); nums6 = getRandomNumbers(all6, 12); title = '🎲 Random Numbers';
+        } else if (type === 'repeat') {
+          nums = getRepeatedNumbersWithCount(freq4, 2, 24); nums6 = getRepeatedNumbersWithCount(freq6, 2, 12); title = '🔁 Repeated Numbers';
+        }
+
+        numberLabel.textContent = title + ' (4-Digit)';
+        numberLabel.classList.remove('hidden');
+
+        renderGrid(numberGrid, nums, isRepeated);
+
+        if (nums6.length) {
+          numberLabel6.textContent = title + ' (6-Digit)';
+          numberLabel6.classList.remove('hidden');
+          renderGrid(numberGrid6, nums6, isRepeated);
+        }
+
+        // Show Big Number if available
+        if (nums.length) {
+          const val = isRepeated ? nums[0][0] : nums[0];
+          bigNumber.innerHTML = `<div class="text-6xl font-black mb-2">${val}</div><div class="text-sm opacity-80 uppercase tracking-widest">Top Prediction</div>`;
+          bigNumber.classList.remove('hidden');
+          bigNumber.onclick = () => copyToClipboard(val);
+        }
+
+      }, 400);
+    }
+
+    function renderGrid(container, items, isRepeated) {
+      if (items.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-4 italic">No numbers found matching criteria.</div>';
+        return;
+      }
+
+      items.forEach((item, i) => {
+        const val = isRepeated ? item[0] : item;
+        const count = isRepeated ? item[1] : null;
+
+        const el = document.createElement('div');
+        el.className = `number-badge bg-white border border-gray-100 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm active:scale-95 transition-transform cursor-pointer hover:bg-blue-50 hover:border-blue-200 relative`;
+        el.style.animationDelay = `${i * 0.03}s`;
+
+        let html = `<span class="font-bold text-gray-800 text-lg">${val}</span>`;
+        if (count) html += `<span class="text-[10px] bg-yellow-100 text-yellow-800 px-1.5 rounded-full font-bold mt-1">${count}x</span>`;
+
+        el.innerHTML = html;
+        el.onclick = () => copyToClipboard(val, el);
+        container.appendChild(el);
+      });
+    }
+
+    function copyToClipboard(text, el) {
+      navigator.clipboard.writeText(text);
+      // Visual feedback
+      if (el) {
+        el.classList.add('ring-2', 'ring-green-500', 'bg-green-50');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-green-500', 'bg-green-50'), 400);
+      } else {
+        // Big number feedback
+        const oldHTML = bigNumber.innerHTML;
+        bigNumber.innerHTML = '<div class="text-2xl font-bold py-4">Copied!</div>';
+        setTimeout(() => bigNumber.innerHTML = oldHTML, 800);
+      }
+    }
+
+    function renderRecentDraws() {
+      if (lastDraws.length === 0) return;
+      const recentContainer = document.getElementById('recentDraws');
+      recentContainer.innerHTML = '';
+
+      lastDraws.slice(-5).reverse().forEach(draw => {
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-xl p-4 border border-gray-100 shadow-sm';
+        div.innerHTML = `
+                <div class="flex items-center gap-2 mb-2 text-indigo-600 font-bold border-b border-gray-50 pb-2">
+                    <span class="material-icons-round text-sm">event</span>
+                    <span>${draw.date}</span>
+                </div>
+                <div class="space-y-2">
+                     <div class="flex flex-wrap gap-1">
+                        ${(draw.numbers4 || []).slice(0, 5).map(n => `<span class="bg-gray-100 text-gray-600 text-xs font-mono px-2 py-1 rounded">${n}</span>`).join('')}
+                        ${(draw.numbers4 || []).length > 5 ? '<span class="text-xs text-gray-400 self-center">...</span>' : ''}
+                     </div>
+                </div>
+             `;
+        recentContainer.appendChild(div);
+      });
+    }
+
+    // Toggle Recent
+    toggleRecentBtn.onclick = () => {
+      const pan = document.getElementById('recentDraws');
+      const arrow = document.getElementById('recentArrow');
+      if (pan.classList.contains('hidden')) {
+        pan.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        pan.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    };
+
+    // Events
+    hotBtn.onclick = () => showNumbers('hot');
+    coldBtn.onclick = () => showNumbers('cold');
+    randomBtn.onclick = () => showNumbers('random');
+    repeatBtn.onclick = () => showNumbers('repeat');
+
+    // Init
+    setLang(currentLang);
+    loadData();
+
+  </script>
+</body>
+
+</html>

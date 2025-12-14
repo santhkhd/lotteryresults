@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Kerala Lottery Results</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="output.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .active-tab {
+      background-color: #2563eb;
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-24 selection:bg-blue-500 selection:text-white">
+
+  <!-- Mobile Header -->
+  <header class="fixed top-0 w-full z-40 glass border-b border-gray-100 transition-all duration-300">
+    <div class="px-5 h-16 flex items-center justify-between max-w-2xl mx-auto">
+      <div>
+        <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-600"
+          id="header-title">
+          Lottery Results
+        </h1>
+        <p class="text-xs text-gray-500 font-medium" id="header-date">Latest Updates</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="langIconBtn"
+          class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">
+          <span class="material-icons-round text-xl">translate</span>
+        </button>
+        <a href="live.html"
+          class="live-btn flex items-center gap-1.5 bg-rose-600 text-white px-3 py-1.5 rounded-full shadow-lg shadow-rose-200 active:scale-95 transition-all">
+          <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+          <span class="text-xs font-bold tracking-wide">LIVE</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Categories / Tabs -->
+    <div class="px-0 pb-3 pt-1">
+      <div class="flex items-center gap-3 overflow-x-auto px-5 scrollbar-hide snap-x" id="lotteryTabs">
+        <button
+          class="tab-btn active-tab shrink-0 px-8 py-2 rounded-full text-sm font-semibold transition-all snap-start border border-transparent"
+          data-category="ALL">All</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="KARUNYA">Karunya</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="KARUNYA_PLUS">Karunya Plus</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="SUVARNA_KERALAM">Suvarna Keralam</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="STHREE_SAKTHI">Sthree Sakthi</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="DHANALEKSHMI">Dhanalekshmi</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="SAMRUDHI">Samrudhi</button>
+        <button
+          class="tab-btn shrink-0 px-8 py-2 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 snap-start active:scale-95 transition-transform"
+          data-category="BHAGYATHARA">Bhagyathara</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Language Popup -->
+  <div id="langPopup"
+    class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity"
+    style="animation: fadeIn 0.2s ease-out;">
+    <div class="bg-white w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform"
+      style="animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-lg font-bold text-gray-800">Choose Language</h3>
+        <button class="p-2 bg-gray-100 rounded-full active:bg-gray-200 transition-colors"
+          onclick="document.getElementById('langPopup').classList.add('hidden')">
+          <span class="material-icons-round text-gray-500">close</span>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <button
+          class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+          data-lang="en">
+          <span>English</span>
+          <span class="text-xl">🇺🇸</span>
+        </button>
+        <button
+          class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+          data-lang="ml">
+          <span>മലയാളം</span>
+          <span class="text-xl">🇮🇳</span>
+        </button>
+        <button
+          class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+          data-lang="ta">
+          <span>தமிழ்</span>
+          <span class="text-xl">🇮🇳</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="pt-32 px-5 max-w-2xl mx-auto min-h-screen">
+
+    <!-- Grid -->
+    <div id="lottery-grid" class="grid grid-cols-1 gap-4 pb-4">
+      <!-- JS Injected Cards -->
+    </div>
+
+    <div id="no-results-message" class="hidden flex flex-col items-center justify-center py-20 text-center">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <span class="material-icons-round text-gray-400 text-3xl">inbox</span>
+      </div>
+      <p class="text-gray-500 font-medium">No particular results found.</p>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav
+    class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-200 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+    <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
+      <a href="index.html" class="flex flex-col items-center justify-center w-full h-full text-blue-600 relative">
+        <div class="absolute -top-1 w-8 h-1 bg-blue-600 rounded-b-full"></div>
+        <span class="material-icons-round text-2xl mb-0.5 animate-bounce-short">home</span>
+        <span class="text-[10px] font-bold">Home</span>
+      </a>
+      <a href="prediction.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5">auto_awesome</span>
+        <span class="text-[10px] font-medium">Lucky</span>
+      </a>
+      <a href="search.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5">search</span>
+        <span class="text-[10px] font-medium">Search</span>
+      </a>
+      <a href="scanner.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5">qr_code_scanner</span>
+        <span class="text-[10px] font-medium">Scan</span>
+      </a>
+      <a href="live.html"
+        class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+        <span class="material-icons-round text-2xl mb-0.5 text-rose-500">live_tv</span>
+        <span class="text-[10px] font-medium text-rose-500">Live</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // Language logic
+    let currentLang = localStorage.getItem('lang') || 'en';
+
+    const langStrings = {
+      en: 'Lottery Results',
+      ml: 'ലോട്ടറി ഫലം',
+      ta: 'லாட்டரி முடிவுகள்'
+    };
+
+    // Update Header Date
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+
+    const lotteryNameTranslations = {
+      SAMRUDHI: { en: 'SAMRUDHI', ml: 'സമൃദ്ധി', ta: 'சம்ருத்தி' },
+      BHAGYATHARA: { en: 'BHAGYATHARA', ml: 'ഭാഗ്യതാര', ta: 'பாக்யதாரா' },
+      STHREE_SAKTHI: { en: 'STHREE-SAKTHI', ml: 'സ്ത്രീ-ശക്തി', ta: 'ஸ்த்ரீ-சக்தி' },
+      DHANALEKSHMI: { en: 'DHANALEKSHMI', ml: 'ധനലക്ഷ്മി', ta: 'தனலட்சுமி' },
+      KARUNYA_PLUS: { en: 'KARUNYA PLUS', ml: 'കരുണ്യ പ്ലസ്', ta: 'கருண்யா பிளஸ்' },
+      SUVARNA_KERALAM: { en: 'SUVARNA KERALAM', ml: 'സുവർണ കേരളം', ta: 'சுவர்ண கேரளம்' },
+      KARUNYA: { en: 'KARUNYA', ml: 'കരുണ്യ', ta: 'கருண்யா' },
+      POOJA_BUMPER: { en: 'POOJA BUMPER', ml: 'പൂജാ ബമ്പർ', ta: 'பூஜா பம்பர்' }
+    };
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('lang', lang);
+      document.getElementById('header-title').textContent = langStrings[lang] || langStrings['en'];
+      renderLotteryCards(lang);
+    }
+
+    // Language popup setup
+    document.addEventListener('DOMContentLoaded', function () {
+      const langIconBtn = document.getElementById('langIconBtn');
+      const langPopup = document.getElementById('langPopup');
+      const langPopupBtns = langPopup.querySelectorAll('.lang-popup-btn');
+
+      langIconBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        langPopup.classList.toggle('hidden');
+      });
+
+      document.body.addEventListener('click', function (e) {
+        if (!langPopup.contains(e.target) && !langIconBtn.contains(e.target)) {
+          langPopup.classList.add('hidden');
+        }
+      });
+
+      langPopupBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+          setLang(this.getAttribute('data-lang'));
+          langPopup.classList.add('hidden');
+        });
+      });
+
+      setLang(currentLang);
+    });
+
+    async function renderLotteryCards(lang, filterCategory = 'ALL') {
+      let cardData = [];
+      const bumperLotteries = [
+        {
+          name: 'NEW YEAR BUMPER', shortName: 'NY', drawNumber: 'XX', date: '2026-01-15',
+          translations: { en: 'NEW YEAR BUMPER', ml: 'പുതുവത്സര ബമ്പർ', ta: 'புத்தாண்டு பம்பர்' }
+        },
+        {
+          name: 'SUMMER BUMPER', shortName: 'SB', drawNumber: 'XX', date: '2026-03-20',
+          translations: { en: 'SUMMER BUMPER', ml: 'വേനൽ ബമ്പർ', ta: 'கோடை பம்பர்' }
+        },
+        {
+          name: 'MONSOON BUMPER 2025', shortName: 'BR', drawNumber: '104', date: '2025-07-23',
+          translations: { en: 'MONSOON BUMPER 2025', ml: 'മൺസൂൺ ബമ്പർ 2025', ta: 'மான்சூன் பம்பர் 2025' }
+        },
+        {
+          name: 'POOJA BUMPER 2025', shortName: 'BR', drawNumber: '106', date: '2025-11-22',
+          translations: { en: 'POOJA BUMPER 2025', ml: 'പൂജാ ബമ്പർ 2025', ta: 'பூஜா பம்பர் 2025' }
+        }
+      ];
+
+      const catMap = {
+        'SAMRUDHI': 'SM', 'BHAGYATHARA': 'BT', 'STHREE_SAKTHI': 'SS', 'DHANALEKSHMI': 'DL',
+        'KARUNYA_PLUS': 'KN', 'SUVARNA_KERALAM': 'SK', 'KARUNYA': 'KR', 'POOJA_BUMPER': 'BR'
+      };
+
+      const now = new Date();
+      const istTime = new Date(now.getTime() + (330 * 60 * 1000));
+      const todayStr = istTime.toISOString().split('T')[0];
+      const noResultsMessage = document.getElementById('no-results-message');
+      let hasTodayResult = false;
+
+      let manifest = [];
+      try {
+        const res = await fetch('result_manifest.json?v=' + new Date().getTime());
+        manifest = await res.json();
+      } catch (e) {
+        console.error("Failed to load manifest", e);
+        return;
+      }
+
+      if (filterCategory === 'ALL') {
+        bumperLotteries.forEach(bumper => {
+          const m = manifest.find(x => x.code === bumper.shortName && x.date === bumper.date);
+          if (m) {
+            const isNew = (bumper.date === todayStr);
+            if (isNew) hasTodayResult = true;
+            const translatedName = bumper.translations[lang] || bumper.translations['en'];
+            cardData.push(createCardObj(m.filename, isNew, bumper.shortName, bumper.drawNumber, translatedName, bumper.date));
+          }
+        });
+      }
+
+      let filtered = manifest.filter(item => {
+        if (filterCategory === 'ALL') return true;
+        const filterCatMap = catMap;
+        return item.code === filterCatMap[filterCategory];
+      });
+
+
+      filtered.forEach(item => {
+        if (bumperLotteries.some(b => b.shortName === item.code && b.date === item.date)) return;
+        const isNew = (item.date === todayStr);
+        if (isNew) hasTodayResult = true;
+
+        let translatedName = item.code || 'Unknown';
+        for (const [cat, val] of Object.entries(lotteryNameTranslations)) {
+          if (catMap[cat] === item.code) {
+            translatedName = val[lang] || val.en;
+            break;
+          }
+        }
+
+        cardData.push(createCardObj(item.filename, isNew, item.code, item.draw_number, translatedName, item.date));
+      });
+
+      cardData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      const grid = document.getElementById('lottery-grid');
+      grid.innerHTML = cardData.map(c => c.html).join('');
+      noResultsMessage.classList.toggle('hidden', cardData.length > 0);
+    }
+
+    function createCardObj(filename, isNew, code, drawNum, name, date) {
+      const dateObj = new Date(date);
+      const day = dateObj.toLocaleDateString('en-US', { day: 'numeric' });
+      const month = dateObj.toLocaleDateString('en-US', { month: 'short' });
+
+      // Dynamic color based on code 
+      const colors = ['bg-purple-100 text-purple-600', 'bg-blue-100 text-blue-600', 'bg-emerald-100 text-emerald-600', 'bg-orange-100 text-orange-600', 'bg-pink-100 text-pink-600'];
+      const colorClass = colors[code.charCodeAt(0) % colors.length];
+
+      return {
+        date: date,
+        html: `
+            <a href="result.html?file=${filename}" class="group relative flex items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100 active:scale-[0.98] transition-all duration-200">
+                ${isNew ? '<div class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md z-10 animate-pulse">NEW</div>' : ''}
+                
+                <!-- Date Box -->
+                <div class="flex-shrink-0 w-14 h-14 bg-gray-50 rounded-xl flex flex-col items-center justify-center border border-gray-200 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors">
+                    <span class="text-xs font-semibold text-gray-500 uppercase group-hover:text-blue-500">${month}</span>
+                    <span class="text-xl font-bold text-gray-800 group-hover:text-blue-600 line-height-1">${day}</span>
+                </div>
+                
+                <!-- Content -->
+                <div class="ml-4 flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded-md ${colorClass}">${code}-${drawNum}</span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-800 truncate leading-tight">${name}</h3>
+                </div>
+                
+                <!-- Arrow -->
+                <div class="ml-2 flex-shrink-0">
+                    <span class="material-icons-round text-gray-300 group-hover:text-blue-500 transition-colors">chevron_right</span>
+                </div>
+            </a>`
+      }
+    }
+
+    // Tabs
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        tabs.forEach(t => {
+          t.classList.remove('active-tab');
+          t.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+        });
+        this.classList.add('active-tab');
+        this.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+        renderLotteryCards(currentLang, this.dataset.category);
+      });
+    });
+
+  </script>
+</body>
+
+</html>

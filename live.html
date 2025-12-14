@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Live Draw</title>
+    <link href="output.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .subscribe-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(220, 38, 38, 0.2);
+        }
+
+        .subscribe-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-24 selection:bg-blue-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-40 glass border-b border-gray-100 transition-all duration-300">
+        <div class="px-5 h-16 flex items-center justify-between max-w-2xl mx-auto">
+            <div class="flex items-center gap-3">
+                <button onclick="goBack()"
+                    class="p-2 -ml-2 rounded-full hover:bg-gray-100 active:scale-95 transition-all text-gray-600">
+                    <span class="material-icons-round text-2xl">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800" id="header-title">Live Draw</h1>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="langIconBtn"
+                    class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition-all">
+                    <span class="material-icons-round text-xl">translate</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Language Popup -->
+    <div id="langPopup"
+        class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform transition-transform">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800">Choose Language</h3>
+                <button class="p-2 bg-gray-100 rounded-full active:bg-gray-200 transition-colors"
+                    onclick="document.getElementById('langPopup').classList.add('hidden')">
+                    <span class="material-icons-round text-gray-500">close</span>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <button
+                    class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+                    data-lang="en">
+                    <span>English</span>
+                    <span class="text-xl">🇺🇸</span>
+                </button>
+                <button
+                    class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+                    data-lang="ml">
+                    <span>മലയാളം</span>
+                    <span class="text-xl">🇮🇳</span>
+                </button>
+                <button
+                    class="lang-popup-btn w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 transition-all font-medium"
+                    data-lang="ta">
+                    <span>தமிழ்</span>
+                    <span class="text-xl">🇮🇳</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="pt-24 px-5 max-w-2xl mx-auto min-h-screen space-y-8">
+
+        <!-- Subscribe Section -->
+        <div
+            class="bg-gradient-to-tr from-red-600 to-red-500 rounded-3xl p-8 relative overflow-hidden shadow-xl text-center text-white">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+            </div>
+            <div class="relative z-10">
+                <div class="bg-white/20 p-4 rounded-full inline-block mb-4 backdrop-blur-md">
+                    <span class="text-4xl">▶️</span>
+                </div>
+                <h2 class="text-2xl font-bold mb-2" id="subscribe-title">Subscribe for Live Draws</h2>
+                <p class="text-red-100 mb-6 text-sm" id="subscribe-desc">Get instant notifications when results are out!
+                </p>
+
+                <a href="https://www.youtube.com/@datafactory1?sub_confirmation=1" target="_blank"
+                    class="bg-white text-red-600 font-bold py-3 px-8 rounded-full shadow-lg inline-flex items-center gap-2 subscribe-btn">
+                    <span class="material-icons-round">notifications_active</span>
+                    <span id="subscribe-btn-text">Subscribe Now</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Live Stream -->
+        <div>
+            <div class="flex items-center gap-2 mb-3 px-1">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <h3 class="font-bold text-gray-800 uppercase tracking-wider text-sm">Live Stream Options</h3>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Kairali -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                    <a href="https://www.youtube.com/channel/UCnEvxaWfVL91XIYuyQRO5QA/live" target="_blank"
+                        class="block w-full group relative">
+                        <div class="aspect-video bg-gray-900 relative">
+                            <img src="https://img.youtube.com/vi/yiiqRHY1Bl8/hqdefault_live.jpg" alt="Live"
+                                class="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div
+                                    class="bg-white/20 p-4 rounded-full backdrop-blur-sm group-hover:scale-110 transition-transform">
+                                    <span class="material-icons-round text-white text-4xl">play_arrow</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="p-4 border-t border-gray-100 flex justify-between items-center">
+                        <span class="font-bold text-gray-800">Kairali News Live</span>
+                        <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded">LIVE</span>
+                    </div>
+                </div>
+
+                <!-- Kaumudy -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                    <div class="aspect-video bg-black">
+                        <iframe
+                            src="https://bradmax.com/client/embed-player/4e1bf55c403a5ce8290565ca431d65524a36f2db_7239?mediaUrl=https%3A%2F%2Foqgdrkxby4rm-hls-live.5centscdn.com%2Fkaumudytv%2Flive.stream%2Fplaylist.m3u8&title=kaumudytv%2Flive&id=30720"
+                            class="w-full h-full" frameborder="0" allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="p-4 border-t border-gray-100">
+                        <h3 class="font-bold text-gray-800" id="kaumudy-title">Kaumudy TV</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav
+        class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-200 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+        <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
+            <a href="index.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">home</span>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+            <a href="prediction.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">auto_awesome</span>
+                <span class="text-[10px] font-medium">Lucky</span>
+            </a>
+            <a href="search.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">search</span>
+                <span class="text-[10px] font-medium">Search</span>
+            </a>
+            <a href="scanner.html"
+                class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-blue-500 transition-colors">
+                <span class="material-icons-round text-2xl mb-0.5">qr_code_scanner</span>
+                <span class="text-[10px] font-medium">Scan</span>
+            </a>
+            <a href="live.html" class="flex flex-col items-center justify-center w-full h-full text-blue-600 relative">
+                <div class="absolute -top-1 w-8 h-1 bg-blue-600 rounded-b-full"></div>
+                <span class="material-icons-round text-2xl mb-0.5 animate-bounce-short">live_tv</span>
+                <span class="text-[10px] font-bold">Live</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        let currentLang = localStorage.getItem('lang') || 'en';
+
+        const langStrings = {
+            en: {
+                header: 'Live Check',
+                subscribeTitle: 'Subscribe for Live Draws',
+                subscribeDesc: 'Get instant notifications for results!',
+                subscribeBtn: 'Subscribe Now',
+                kaumudy: 'Kaumudy TV Live'
+            },
+            ml: {
+                header: 'ലൈവ് പരിശോധന',
+                subscribeTitle: 'ലൈവ് നറുക്കെടുപ്പിനായി സബ്സ്ക്രൈബ് ചെയ്യൂ',
+                subscribeDesc: 'ഫലങ്ങൾ വരുമ്പോൾ അറിയിപ്പ് നേടൂ!',
+                subscribeBtn: 'സബ്സ്ക്രൈബ് ചെയ്യൂ',
+                kaumudy: 'കൗമുദി ടിവി ലൈവ്'
+            },
+            ta: {
+                header: 'நேரலை சரிபார்ப்பு',
+                subscribeTitle: 'நேரலை டிராவிற்கு சந்தா சேருங்கள்',
+                subscribeDesc: 'முடிவுகள் வந்தவுடன் அறிவிப்பை பெறுங்கள்!',
+                subscribeBtn: 'சந்தா சேருங்கள்',
+                kaumudy: 'கௌமுதி டிவி நேரலை'
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            const t = langStrings[lang];
+
+            document.getElementById('header-title').textContent = t.header;
+            document.getElementById('subscribe-title').textContent = t.subscribeTitle;
+            document.getElementById('subscribe-desc').textContent = t.subscribeDesc;
+            document.getElementById('subscribe-btn-text').textContent = t.subscribeBtn;
+            document.getElementById('kaumudy-title').textContent = t.kaumudy;
+
+            // Update popups buttons style
+            document.querySelectorAll('.lang-popup-btn').forEach(btn => {
+                if (btn.dataset.lang === lang) btn.classList.add('bg-blue-50', 'border-blue-500');
+                else btn.classList.remove('bg-blue-50', 'border-blue-500');
+            });
+        }
+
+        // Popup Logic
+        const langIconBtn = document.getElementById('langIconBtn');
+        const langPopup = document.getElementById('langPopup');
+
+        langIconBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langPopup.classList.remove('hidden');
+        });
+
+        document.body.addEventListener('click', (e) => {
+            if (!langPopup.contains(e.target) && !langIconBtn.contains(e.target)) {
+                langPopup.classList.add('hidden');
+            }
+        });
+
+        document.querySelectorAll('.lang-popup-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLang(btn.dataset.lang);
+                langPopup.classList.add('hidden');
+            });
+        });
+
+        function goBack() {
+            window.history.length > 1 ? window.history.back() : window.location.href = 'index.html';
+        }
+
+        setLang(currentLang);
+    </script>
+</body>
+
+</html>

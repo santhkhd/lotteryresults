@@ -1,0 +1,19 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+
+# Environment files
+.env
+
+# macOS system files
+.DS_Store
+
+# Ignore HTML and CSS files except for index.html
+
