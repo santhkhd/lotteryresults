@@ -180,15 +180,37 @@ def scrape_lottery_result(url, html):
             if "rs" in line_lower and ("/-" in line_lower or len(line) < 25): continue
             if "lottery" in line_lower: continue
             if "page" in line_lower: continue
+            
+            # Find candidate tickets
+            # Regex patterns to preserve Series Code + Number (e.g. AB 123456 or AB-123456)
+            # OR just a sequence of digits (e.g. 1234 or 123456)
+            # We want to capture [A-Z]{2}[\s\-]?[0-9]{6} OR [0-9]{4,6}
+            
+            # Simple approach: Find all sequences of alphanumeric chars, then filter
+            # But "AB 123456" is two sequences in regex \w+.
+            # Better: Match specific ticket patterns first.
+            
+            # Pattern 1: Series + Digits (e.g. WA 123456, WA-123456, WA123456)
+            # Allowing 1-3 letters, optional separator, 6 digits.
+            series_matches = list(re.finditer(r'\b([A-Z]{1,3})[\s-]?(\d{6})\b', line, re.IGNORECASE))
+            
+            # We also need to capture plain numbers (4 digits, 6 digits) that are NOT part of the above.
+            # So, we can replace the found series_matches in the line with spaces, then look for remaining numbers?
+            # Or just assume if we found series matches, that's what we want from this line.
+            
+            if series_matches:
+                for match in series_matches:
+                    # reconstruct standardized "AB 123456"
+                    code_part = match.group(1).upper()
+                    num_part = match.group(2)
+                    current_winners.append(f"{code_part} {num_part}")
+            else:
+                # Fallback: look for simple numbers (4 to 6 digits)
+                # This covers lower prizes which often don't have series
+                nums = re.findall(r'\b\d{4,6}\b', line)
+                for n in nums:
+                    current_winners.append(n)
 
-            # Tokens
-            tokens = re.split(r'[,| ]', line)
-            for t in tokens:
-                t = t.strip()
-                if not t: continue
-                # minimal validation: must have digits
-                if re.search(r'\d', t):
-                   current_winners.append(t)
                    
     commit_prize() # trailing
 
