@@ -69,7 +69,7 @@ def main():
 
     # 5. Install Python Dependencies
     print("Installing dependencies...")
-    run_command("pip install requests beautifulsoup4 pytz schedule")
+    run_command("pip install requests beautifulsoup4 pytz schedule cloudscraper")
 
     # 6. Run the scraping script
     print("Fetching lottery results...")
@@ -100,5 +100,39 @@ def main():
         else:
             print("❌ FAILED: Could not push to GitHub.")
 
-if __name__ == "__main__":
+def job():
+    print(f"\n[Scheduler] Starting job at {datetime.now()}")
     main()
+
+if __name__ == "__main__":
+    # --- MODE SELECTION ---
+    # Set this to True to run the script in a loop (Daily at 3:30 PM)
+    # Note: You must keep the Colab tab open.
+    ENABLE_SCHEDULER = False 
+    
+    if len(sys.argv) > 1 and sys.argv[1] == '--schedule':
+        ENABLE_SCHEDULER = True
+
+    if ENABLE_SCHEDULER:
+        import schedule
+        import time
+        from datetime import datetime
+        
+        # Schedule to run at 15:30 (3:30 PM) UTC time? 
+        # Colab timezone is usually UTC. 3:30 PM IST is 10:00 AM UTC.
+        # Let's run it every hour to be safe or specific time.
+        # For now, let's just run it once immediately then schedule.
+        
+        print("Scheduler Enabled. Running immediately first...")
+        job()
+        
+        print("Scheduling daily runs at 10:00 UTC (3:30 PM IST)...")
+        schedule.every().day.at("10:00").do(job) # 3:30 PM IST
+        
+        while True:
+            schedule.run_pending()
+            time.sleep(60)
+    else:
+        # Run once immediately
+        main()
+

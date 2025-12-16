@@ -20,6 +20,14 @@ MAIN_URL = "https://www.kllotteryresult.com/"
 
 def robust_get(url: str, headers: dict, timeout: int = 20, max_retries: int = 3):
     last_exc = None
+    
+    # Try using cloudscraper first (better for bypassing blocks)
+    try:
+        import cloudscraper
+        scraper = cloudscraper.create_scraper()
+    except ImportError:
+        scraper = None
+
     for attempt in range(1, max_retries + 1):
         try:
              # Random UA
@@ -28,7 +36,12 @@ def robust_get(url: str, headers: dict, timeout: int = 20, max_retries: int = 3)
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             ])
-            res = requests.get(url, headers=current_headers, timeout=timeout, verify=False)
+            
+            if scraper:
+                res = scraper.get(url, headers=current_headers, timeout=timeout)
+            else:
+                res = requests.get(url, headers=current_headers, timeout=timeout, verify=False)
+                
             if res.status_code == 200:
                 return res
             print(f"DEBUG: Status {res.status_code} for {url}")
