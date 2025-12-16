@@ -1,332 +1,249 @@
+import requests
+import re
 import os
 import json
-import re
-import sys
-import requests
-from bs4 import BeautifulSoup, Tag
-from datetime import datetime, time as dt_time, date, timedelta
-from typing import Optional, List, Tuple, Dict, Any
-import pytz
+from datetime import datetime, date
 import time
+from bs4 import BeautifulSoup
+import urllib3
 import random
-import hashlib
-import pickle
-from urllib.parse import quote
 
-# Define the Indian timezone
-IST = pytz.timezone('Asia/Kolkata')
+urllib3.disable_warnings()
 
-# Enhanced headers to look more like a real browser
+# Configuration
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
-    'Cache-Control': 'max-age=0',
-    'Referer': 'https://www.kllotteryresult.com/'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 }
+CACHE_DIR = "cache"
+NOTE_DIR = "note"
+MAIN_URL = "https://www.kllotteryresult.com/"
 
-# Optional proxy-based scraping fallback (e.g., ScraperAPI or compatible)
-# Provide an API key via env var SCRAPERAPI_KEY in CI to bypass origin blocking.
-SCRAPER_API_KEY = os.environ.get('SCRAPERAPI_KEY', '').strip()
-SCRAPER_API_ENDPOINT = os.environ.get('SCRAPERAPI_ENDPOINT', 'http://api.scraperapi.com')
-
-def get_cached_result(url: str, cache_duration_hours: int = 6) -> Optional[str]:
-    """Get cached result if available and not expired."""
-    # Create cache directory if it doesn't exist
-    os.makedirs("cache", exist_ok=True)
-    
-    cache_key = hashlib.md5(url.encode()).hexdigest()
-    cache_file = f"cache/{cache_key}.pkl"
-    
-    if os.path.exists(cache_file):
-        # Check if cache is still valid
-        file_time = os.path.getmtime(cache_file)
-        if (time.time() - file_time) < (cache_duration_hours * 3600):
-            try:
-                with open(cache_file, 'rb') as f:
-                    print(f"DEBUG: Using cached result for {url}")
-                    return pickle.load(f)
-            except Exception as e:
-                print(f"DEBUG: Failed to load cache: {e}")
-                # Remove corrupted cache file
-                os.remove(cache_file)
-    return None
-
-def save_to_cache(url: str, content: str):
-    """Save content to cache."""
-    os.makedirs("cache", exist_ok=True)
-    cache_key = hashlib.md5(url.encode()).hexdigest()
-    cache_file = f"cache/{cache_key}.pkl"
-    
-    try:
-        with open(cache_file, 'wb') as f:
-            pickle.dump(content, f)
-        print(f"DEBUG: Saved result to cache for {url}")
-    except Exception as e:
-        print(f"DEBUG: Failed to save to cache: {e}")
-
-def build_proxy_url(target_url: str) -> str:
-    if not SCRAPER_API_KEY:
-        return target_url
-    # ScraperAPI format: http(s)://api.scraperapi.com?api_key=KEY&url=ENCODED
-    from urllib.parse import urlencode
-    query = urlencode({'api_key': SCRAPER_API_KEY, 'url': target_url})
-    return f"{SCRAPER_API_ENDPOINT}?{query}"
-
-def robust_get(url: str, headers: dict, timeout: int = 20, max_retries: int = 3) -> requests.Response:
-    """Try direct fetch first; on 403/429/5xx or network error, retry and fall back to proxy if configured."""
-    # First check cache
-    cached_content = get_cached_result(url)
-    if cached_content:
-        # Create a mock response object
-        class MockResponse:
-            def __init__(self, content):
-                self.text = content
-                self.status_code = 200
-            def raise_for_status(self):
-                pass
-        return MockResponse(cached_content)
-    
+def robust_get(url: str, headers: dict, timeout: int = 20, max_retries: int = 3):
     last_exc = None
     for attempt in range(1, max_retries + 1):
         try:
-            # Add randomization to headers to avoid detection
-            request_headers = headers.copy()
-            request_headers['User-Agent'] = random.choice([
+             # Random UA
+            current_headers = headers.copy()
+            current_headers['User-Agent'] = random.choice([
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             ])
-            
-            res = requests.get(url, headers=request_headers, timeout=timeout)
-            print(f"DEBUG: Request to {url} returned status {res.status_code}")
-            
-            if res.status_code in (403, 429) or res.status_code >= 500:
-                raise requests.exceptions.RequestException(f"HTTP {res.status_code}")
-            
-            # Save successful response to cache
-            save_to_cache(url, res.text)
-            return res
-        except requests.exceptions.RequestException as exc:
-            last_exc = exc
-            print(f"DEBUG: Attempt {attempt} failed with {exc}")
-            # Try proxy fallback if available
-            if SCRAPER_API_KEY:
-                try:
-                    proxy_url = build_proxy_url(url)
-                    print(f"DEBUG: Trying proxy URL: {proxy_url}")
-                    res = requests.get(proxy_url, headers=headers, timeout=timeout)
-                    if res.status_code in (403, 429) or res.status_code >= 500:
-                        raise requests.exceptions.RequestException(f"Proxy HTTP {res.status_code}")
-                    
-                    # Save successful response to cache
-                    save_to_cache(url, res.text)
-                    return res
-                except requests.exceptions.RequestException as exc2:
-                    last_exc = exc2
-                    print(f"DEBUG: Proxy attempt failed with {exc2}")
-            # Backoff between attempts
-            if attempt < max_retries:
-                wait_time = min(2 ** attempt, 10)  # Exponential backoff up to 10 seconds
-                print(f"DEBUG: Waiting {wait_time} seconds before retry")
-                time.sleep(wait_time)
-    # Exhausted retries
+            res = requests.get(url, headers=current_headers, timeout=timeout, verify=False)
+            if res.status_code == 200:
+                return res
+            print(f"DEBUG: Status {res.status_code} for {url}")
+        except Exception as e:
+            last_exc = e
+            print(f"DEBUG: Error fetching {url}: {e}")
+            time.sleep(2)
     if last_exc:
         raise last_exc
-    raise RuntimeError("Failed to fetch URL and no exception captured")
-
-def fetch_text_via_jina(url: str) -> str:
-    """Fetch page text via r.jina.ai to bypass Cloudflare challenges without API keys."""
-    # Check cache first
-    cached_content = get_cached_result(url)
-    if cached_content:
-        return cached_content
-    
-    proxied = "https://r.jina.ai/http://" + url.replace("https://", "").replace("http://", "")
-    res = requests.get(proxied, headers=HEADERS, timeout=30)
-    res.raise_for_status()
-    
-    # Save to cache
-    save_to_cache(url, res.text)
-    return res.text
+    raise Exception(f"Failed to fetch {url}")
 
 def fetch_page_text(url: str) -> str:
-    """Fetch page HTML using direct request first, then fallback to Jina proxy."""
-    # Check cache first
-    cached_content = get_cached_result(url)
-    if cached_content:
-        print(f"DEBUG: Using cached content for {url}")
-        return cached_content
-    
-    try:
-        print(f"DEBUG: Trying direct fetch for {url}")
-        res = robust_get(url, HEADERS, timeout=25)
-        res.raise_for_status()
-        content = res.text
-        print(f"DEBUG: Direct fetch successful, status: {res.status_code}")
-        print(f"DEBUG: Content length: {len(content)}")
-        print(f"DEBUG: Content preview: {content[:200]}")
-        
-        # Check if content looks like HTML
-        if "<html" not in content.lower() and "<!doctype" not in content.lower():
-            print("DEBUG: Content doesn't look like HTML, might be blocked")
-        
-        # Save to cache
-        save_to_cache(url, content)
-        return content
-    except Exception as e:
-        print(f"DEBUG: Direct fetch failed: {e}")
-        print("DEBUG: Trying Jina proxy fallback")
-        try:
-            result = fetch_text_via_jina(url)
-            print(f"DEBUG: Jina proxy result length: {len(result)}")
-            print(f"DEBUG: Jina content preview: {result[:200]}")
-            return result
-        except Exception as jina_e:
-            print(f"DEBUG: Jina proxy also failed: {jina_e}")
-            raise
+    print(f"Fetching {url}...")
+    res = robust_get(url, HEADERS)
+    return res.text
 
-def parse_date_from_text(text: str) -> Optional[date]:
-    """Extract a date from text supporting multiple formats."""
-    try:
-        # Common numeric formats: 16-09-2025, 16/09/2025, 16.09.2025
-        m = re.search(r"(\d{2})[./-](\d{2})[./-](\d{4})", text)
-        if m:
-            try:
-                return datetime.strptime(f"{m.group(3)}-{m.group(2)}-{m.group(1)}", "%Y-%m-%d").date()
-            except ValueError:
-                pass
-        # Textual month formats: 16 September 2025, 16 Sep 2025, Sep 16, 2025
-        patterns = [
-            "%d %B %Y", "%d %b %Y", "%b %d, %Y", "%B %d, %Y",
-            "%d-%b-%Y", "%d-%B-%Y"
-        ]
-        # Try sliding windows around words that look like dates
-        candidates = []
-        # Gather tokens that include month names
-        month_regex = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)"
-        for m2 in re.finditer(rf"\b\d{{1,2}}\s+{month_regex}\s+\d{{4}}\b", text, flags=re.I):
-            candidates.append(m2.group(0))
-        for m3 in re.finditer(rf"\b{month_regex}\s+\d{{1,2}},\s*\d{{4}}\b", text, flags=re.I):
-            candidates.append(m3.group(0))
-        for cand in candidates:
-            for fmt in patterns:
-                try:
-                    return datetime.strptime(cand, fmt).date()
-                except ValueError:
-                    continue
-    except Exception as e:
-        print(f"Error in parse_date_from_text: {e}")
+def parse_date_from_text(text: str):
+    # 16.12.2025 or 16-12-2025
+    m = re.search(r"(\d{2})[./-](\d{2})[./-](\d{4})", text)
+    if m:
+        try:
+            return datetime.strptime(f"{m.group(3)}-{m.group(2)}-{m.group(1)}", "%Y-%m-%d").date()
+        except: pass
     return None
 
+def scrape_lottery_result(url, html):
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    # 1. Metadata
+    title_text = ""
+    if soup.title:
+        title_text = soup.title.string.strip()
+    
+    # Try getting title from h1 if not suitable in title tag
+    h1 = soup.find("h1")
+    if h1 and "lottery result" not in h1.text.lower():
+        pass 
+    
+    # Date
+    result_date = parse_date_from_text(title_text)
+    if not result_date:
+        result_date = parse_date_from_text(soup.get_text())
+        
+    if not result_date:
+        print("DEBUG: No date found")
+        return None
+        
+    str_date = str(result_date)
+    
+    # Parse Name and Draw Number
+    # Pattern: "Kerala Lottery Result ... Sthree Sakthi (SS-498)"
+    lottery_name = "Unknown Lottery"
+    draw_number = "XX"
+    code = "XX"
+    
+    # Extract Draw Code/Number e.g. (SS-498)
+    m_draw = re.search(r"\(([A-Z]+)-(\d+)\)", title_text)
+    if m_draw:
+        code = m_draw.group(1)
+        draw_number = f"{code}-{m_draw.group(2)}"
+    
+    # Extract Name: "Sthree Sakthi (SS-498)"
+    # Fallback: Remove known prefixes
+    clean_title = title_text
+    clean_title = re.sub(r'Kerala Lottery Result Today', '', clean_title, flags=re.IGNORECASE)
+    clean_title = re.sub(r'\d+[./-]\d+[./-]\d+', '', clean_title) # Remove date
+    clean_title = re.sub(r'\([^\)]+\)', '', clean_title) # Remove (SS-498)
+    clean_title = clean_title.replace('|', '').replace('-', '').strip()
+    
+    if clean_title:
+        lottery_name = clean_title.upper()
+    
+    if lottery_name == "UNKNOWN LOTTERY" or len(lottery_name) < 3:
+        # Try map from code
+        code_map = {
+             'SS': 'STHREE SAKTHI', 'DL': 'DHANALEKSHMI', 'AK': 'AKSHAYA', 
+             'KR': 'KARUNYA', 'KN': 'KARUNYA PLUS', 'NR': 'NIRMAL', 'FF': 'FIFTY FIFTY',
+             'SK': 'SUVARNA KERALAM', 'BT': 'BHAGYATHARA', 'SM': 'SAMRUDHI'
+        }
+        if code in code_map:
+            lottery_name = code_map[code]
+    
+    # 2. Prizes keys
+    prizes = {}
+    
+    # Definitions
+    prize_defs = [
+        ("1st_prize", ["1st Prize", "First Prize"], 10000000),
+        ("consolation_prize", ["Consolation Prize", "Cons. Prize", "Cons Prize"], 8000),
+        ("2nd_prize", ["2nd Prize", "Second Prize"], 1000000),
+        ("3rd_prize", ["3rd Prize", "Third Prize"], 100000),
+        ("4th_prize", ["4th Prize", "Fourth Prize"], 5000),
+        ("5th_prize", ["5th Prize", "Fifth Prize"], 2000),
+        ("6th_prize", ["6th Prize", "Sixth Prize"], 1000),
+        ("7th_prize", ["7th Prize", "Seventh Prize"], 500),
+        ("8th_prize", ["8th Prize", "Eighth Prize"], 100),
+        ("9th_prize", ["9th Prize", "Ninth Prize"], 50),
+    ]
+    
+    label_map = {}
+    for key, labels, amt in prize_defs:
+        for l in labels:
+            label_map[l.lower()] = (key, labels[0], amt)
+
+    # State machine
+    raw_text = soup.get_text("\n")
+    lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
+    
+    current_key = None
+    current_label = None
+    current_amount = 0
+    current_winners = []
+    
+    def commit_prize():
+        nonlocal current_key, current_winners
+        if current_key:
+            valid = []
+            for w in current_winners:
+                w_clean = re.sub(r'[^A-Z0-9]', '', w.upper())
+                if len(w_clean) >= 4:
+                    valid.append(w)
+            
+            prizes[current_key] = {
+                "amount": current_amount,
+                "label": current_label,
+                "winners": valid
+            }
+        current_winners = []
+
+    for line in lines:
+        line_lower = line.lower()
+        
+        # Check header
+        found_header = False
+        for l_txt, (key, main_label, amt) in label_map.items():
+             # Basic fuzzy match: contains text
+            if l_txt in line_lower and len(line) < 60:
+                commit_prize()
+                current_key = key
+                current_label = main_label
+                current_amount = amt
+                found_header = True
+                break
+        
+        if found_header:
+            continue
+            
+        if current_key:
+            if "rs" in line_lower and ("/-" in line_lower or len(line) < 25): continue
+            if "lottery" in line_lower: continue
+            if "page" in line_lower: continue
+
+            # Tokens
+            tokens = re.split(r'[,| ]', line)
+            for t in tokens:
+                t = t.strip()
+                if not t: continue
+                # minimal validation: must have digits
+                if re.search(r'\d', t):
+                   current_winners.append(t)
+                   
+    commit_prize() # trailing
+
+    # Filename
+    # If SS-498 exists, fine.
+    # We use code-num-date format
+    num_part = m_draw.group(2) if m_draw else 'XX'
+    filename = f"{code}-{num_part}-{str_date}.json"
+
+    return {
+        "lottery_name": lottery_name,
+        "draw_number": draw_number,
+        "draw_date": str_date,
+        "venue": "", 
+        "prizes": prizes,
+        "filename": filename,
+        "github_url": f"https://raw.githubusercontent.com/santhkhd/kerala_loto/main/note/{filename}",
+        "downloadLink": ""
+    }
+
 def get_last_n_result_links(n=15):
-    MAIN_URL = "https://www.kllotteryresult.com/"
-    today = datetime.now().date()
+    text = fetch_page_text(MAIN_URL)
+    soup = BeautifulSoup(text, 'html.parser')
+    links = set()
     
-    # Check if we have cached homepage links
-    homepage_cache_file = "cache/homepage_links.pkl"
-    if os.path.exists(homepage_cache_file):
-        file_time = os.path.getmtime(homepage_cache_file)
-        # Use cached links if less than 1 hour old
-        if (time.time() - file_time) < 3600:
-            try:
-                with open(homepage_cache_file, 'rb') as f:
-                    cached_links = pickle.load(f)
-                    print("DEBUG: Using cached homepage links")
-                    return cached_links[:n]
-            except Exception as e:
-                print(f"DEBUG: Failed to load cached homepage links: {e}")
+    for a in soup.find_all('a', href=True):
+        h = a['href']
+        if 'kerala-lottery-result' in h.lower():
+            if h.startswith('/'):
+                h = MAIN_URL.rstrip('/') + h
+            links.add(h)
     
-    try:
-        page_text = fetch_page_text(MAIN_URL)
-        # Add delay to avoid rate limiting
-        time.sleep(1)
-    except Exception as e:
-        print(f"Error fetching homepage: {e}")
-        return []
+    return sorted(list(links))
 
-    # Extract links using both HTML parsing and regex as fallback
-    candidates_set = set()
-    try:
-        soup = BeautifulSoup(page_text, "html.parser")
-        for a in soup.find_all("a", href=True):
-            href = a["href"].strip()
-            if "kerala-lottery-result" in href.lower():
-                if href.startswith("http"):
-                    candidates_set.add(href)
-                else:
-                    candidates_set.add(f"https://www.kllotteryresult.com{href}")
-    except Exception as e:
-        print(f"Error parsing homepage HTML: {e}")
-        pass
-    # Regex fallback
-    if not candidates_set:
-        abs_links = re.findall(r'https?://www\.kllotteryresult\.com/[a-z0-9-]*kerala-lottery-result[a-z0-9-]*/?', page_text, flags=re.I)
-        rel_links = re.findall(r'/[a-z0-9-]*kerala-lottery-result[a-z0-9-]*/?', page_text, flags=re.I)
-        for p in abs_links:
-            candidates_set.add(p)
-        for p in rel_links:
-            candidates_set.add(f"https://www.kllotteryresult.com{p}")
-    candidates = sorted(candidates_set)
-
-    # Logging: counts (abs/rel) — we normalized to absolute URLs, so report abs only
-    abs_count = len([c for c in candidates if c.startswith("http")])
-    print(f"Homepage links: abs={abs_count} candidates={len(candidates)}")
-    if candidates:
-        for preview_url in candidates[:5]:
-            print(f"Candidate: {preview_url}")
-
-    results = []
-    seen = set()
-    dated_candidates: List[Tuple[date, str]] = []
-    for url in candidates:
-        if url in seen:
-            continue
-        seen.add(url)
-        # fetch the result page text (direct first, then fallback) and validate date <= today
+def main():
+    os.makedirs(NOTE_DIR, exist_ok=True)
+    links = get_last_n_result_links()
+    print(f"Found {len(links)} links")
+    
+    today = date.today()
+    
+    for url in links:
         try:
-            page_text2 = fetch_page_text(url)
-            # Add delay between requests to avoid rate limiting
-            time.sleep(1)
+            print(f"Processing {url}")
+            text = fetch_page_text(url)
+            data = scrape_lottery_result(url, text)
+            
+            if data:
+                fpath = os.path.join(NOTE_DIR, data['filename'])
+                with open(fpath, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2)
+                print(f"Saved {fpath}")
+                
         except Exception as e:
-            print(f"Skip {url}: fetch error {e}")
-            continue
-        # find date using robust parser
-        result_date = parse_date_from_text(page_text2) or None
-        if not result_date:
-            print(f"Skip {url}: no date found")
-            continue
-        # Include results from the last 30 days to ensure we don't miss any
-        # This will help capture the missing results
-        days_diff = (today - result_date).days
-        if result_date <= today and days_diff <= 30:
-            dated_candidates.append((result_date, url))
-        elif result_date <= today:
-            # Still include older results but with lower priority
-            # Add a large number to sort them after recent results
-            dated_candidates.append((result_date, url))
-        else:
-            print(f"Skip {url}: future date {result_date}")
-    # Sort by date descending and return top n URLs
-    # For recent results (within 30 days), sort normally
-    # For older results, we still include them but they'll be at the end
-    dated_candidates.sort(key=lambda x: x[0], reverse=True)
-    
-    # Cache the results
-    try:
-        with open(homepage_cache_file, 'wb') as f:
-            pickle.dump([url for _, url in dated_candidates], f)
-    except Exception as e:
-        print(f"DEBUG: Failed to cache homepage links: {e}")
-    
-    for d, u in dated_candidates[:n]:
-        results.append(u)
-    return results
+            print(f"Error processing {url}: {e}")
 
-# ... rest of the code remains the same ...
+if __name__ == "__main__":
+    main()
