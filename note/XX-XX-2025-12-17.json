@@ -1,6 +1,6 @@
 {
-  "lottery_name": "LIVE    DHANALAKSHMI",
-  "draw_number": "DL-31",
+  "lottery_name": "LIVE     FOR DHANALAKSHMI DL31",
+  "draw_number": "XX",
   "draw_date": "2025-12-17",
   "venue": "",
   "prizes": {
@@ -133,11 +133,12 @@
         "2025",
         "2025",
         "2025",
+        "2025",
         "2025"
       ]
     }
   },
-  "filename": "DL-31-2025-12-17.json",
-  "github_url": "https://raw.githubusercontent.com/santhkhd/kerala_loto/main/note/DL-31-2025-12-17.json",
+  "filename": "XX-XX-2025-12-17.json",
+  "github_url": "https://raw.githubusercontent.com/santhkhd/kerala_loto/main/note/XX-XX-2025-12-17.json",
   "downloadLink": ""
 }
