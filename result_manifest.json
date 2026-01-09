@@ -1,5 +1,77 @@
 [
   {
+    "code": "SK",
+    "draw_number": "35",
+    "date": "2026-01-09",
+    "filename": "SK-35-2026-01-09.json"
+  },
+  {
+    "code": "KN",
+    "draw_number": "605",
+    "date": "2026-01-08",
+    "filename": "KN-605-2026-01-08.json"
+  },
+  {
+    "code": "DL",
+    "draw_number": "34",
+    "date": "2026-01-07",
+    "filename": "DL-34-2026-01-07.json"
+  },
+  {
+    "code": "SS",
+    "draw_number": "501",
+    "date": "2026-01-06",
+    "filename": "SS-501-2026-01-06.json"
+  },
+  {
+    "code": "BT",
+    "draw_number": "36",
+    "date": "2026-01-05",
+    "filename": "BT-36-2026-01-05.json"
+  },
+  {
+    "code": "SM",
+    "draw_number": "36",
+    "date": "2026-01-04",
+    "filename": "SM-36-2026-01-04.json"
+  },
+  {
+    "code": "KR",
+    "draw_number": "737",
+    "date": "2026-01-03",
+    "filename": "KR-737-2026-01-03.json"
+  },
+  {
+    "code": "SK",
+    "draw_number": "34",
+    "date": "2026-01-02",
+    "filename": "SK-34-2026-01-02.json"
+  },
+  {
+    "code": "KN",
+    "draw_number": "604",
+    "date": "2026-01-01",
+    "filename": "KN-604-2026-01-01.json"
+  },
+  {
+    "code": "DL",
+    "draw_number": "33",
+    "date": "2025-12-31",
+    "filename": "DL-33-2025-12-31.json"
+  },
+  {
+    "code": "SS",
+    "draw_number": "500",
+    "date": "2025-12-30",
+    "filename": "SS-500-2025-12-30.json"
+  },
+  {
+    "code": "BT",
+    "draw_number": "35",
+    "date": "2025-12-29",
+    "filename": "BT-35-2025-12-29.json"
+  },
+  {
     "code": "DL",
     "draw_number": "31",
     "date": "2025-12-17",
