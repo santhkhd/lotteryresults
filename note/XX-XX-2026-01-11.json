@@ -1,6 +1,6 @@
 {
-  "lottery_name": "LIVE    SAMRUDHI",
-  "draw_number": "SM-37",
+  "lottery_name": "LIVE     FOR SAMRUDHI SM37",
+  "draw_number": "XX",
   "draw_date": "2026-01-11",
   "venue": "",
   "prizes": {
@@ -463,6 +463,7 @@
         "2026",
         "2026",
         "2026",
+        "2026",
         "2025",
         "2025",
         "2025",
@@ -476,7 +477,7 @@
       ]
     }
   },
-  "filename": "SM-37-2026-01-11.json",
-  "github_url": "https://raw.githubusercontent.com/santhkhd/kerala_loto/main/note/SM-37-2026-01-11.json",
+  "filename": "XX-XX-2026-01-11.json",
+  "github_url": "https://raw.githubusercontent.com/santhkhd/kerala_loto/main/note/XX-XX-2026-01-11.json",
   "downloadLink": ""
 }
