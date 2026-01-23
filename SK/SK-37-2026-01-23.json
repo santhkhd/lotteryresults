@@ -1,0 +1,76 @@
+{
+  "lottery": "SK",
+  "draw": "SK-37",
+  "date": "2026-01-23",
+  "filename": "SK-37-2026-01-23.json",
+  "github_url": "https://raw.githubusercontent.com/santhkhd/lotteryresults/main/SK/SK-37-2026-01-23.json",
+  "prizes": [
+    {
+      "prize_key": "ra_700044",
+      "label": "RA 700044",
+      "prize_amount": "700044",
+      "winning_numbers": [
+        "RB700044"
+      ]
+    },
+    {
+      "prize_key": "1671",
+      "label": "1671",
+      "prize_amount": "2922",
+      "winning_numbers": [
+        "2881"
+      ]
+    },
+    {
+      "prize_key": "0113",
+      "label": "0113",
+      "prize_amount": "1796",
+      "winning_numbers": [
+        "1653"
+      ]
+    },
+    {
+      "prize_key": "0788",
+      "label": "0788",
+      "prize_amount": "0951",
+      "winning_numbers": [
+        "0924"
+      ]
+    },
+    {
+      "prize_key": "0042",
+      "label": "0042",
+      "prize_amount": "0138",
+      "winning_numbers": [
+        "0076"
+      ]
+    },
+    {
+      "prize_key": "0001",
+      "label": "0001",
+      "prize_amount": "0033",
+      "winning_numbers": [
+        "0028"
+      ]
+    },
+    {
+      "prize_key": "0059",
+      "label": "0059",
+      "prize_amount": "0272",
+      "winning_numbers": [
+        "0226"
+      ]
+    }
+  ],
+  "numbers4": [
+    "0028",
+    "0076",
+    "0226",
+    "0924",
+    "1653",
+    "2881"
+  ],
+  "numbers6": [
+    "700044"
+  ]
+}

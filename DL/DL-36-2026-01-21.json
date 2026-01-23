@@ -1,0 +1,76 @@
+{
+  "lottery": "DL",
+  "draw": "DL-36",
+  "date": "2026-01-21",
+  "filename": "DL-36-2026-01-21.json",
+  "github_url": "https://raw.githubusercontent.com/santhkhd/lotteryresults/main/DL/DL-36-2026-01-21.json",
+  "prizes": [
+    {
+      "prize_key": "dn_839145",
+      "label": "DN 839145",
+      "prize_amount": "839145",
+      "winning_numbers": [
+        "DO839145"
+      ]
+    },
+    {
+      "prize_key": "0045",
+      "label": "0045",
+      "prize_amount": "1687",
+      "winning_numbers": [
+        "1614"
+      ]
+    },
+    {
+      "prize_key": "1490",
+      "label": "1490",
+      "prize_amount": "5276",
+      "winning_numbers": [
+        "2386"
+      ]
+    },
+    {
+      "prize_key": "0283",
+      "label": "0283",
+      "prize_amount": "0316",
+      "winning_numbers": [
+        "0315"
+      ]
+    },
+    {
+      "prize_key": "0374",
+      "label": "0374",
+      "prize_amount": "0578",
+      "winning_numbers": [
+        "0537"
+      ]
+    },
+    {
+      "prize_key": "0001",
+      "label": "0001",
+      "prize_amount": "0463",
+      "winning_numbers": [
+        "0296"
+      ]
+    },
+    {
+      "prize_key": "0090",
+      "label": "0090",
+      "prize_amount": "0199",
+      "winning_numbers": [
+        "0096"
+      ]
+    }
+  ],
+  "numbers4": [
+    "0096",
+    "0296",
+    "0315",
+    "0537",
+    "1614",
+    "2386"
+  ],
+  "numbers6": [
+    "839145"
+  ]
+}
